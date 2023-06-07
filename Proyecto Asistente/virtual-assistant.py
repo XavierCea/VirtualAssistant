@@ -3,6 +3,8 @@ import pyttsx3
 import pywhatkit
 import datetime
 import wikipedia
+import requests
+import json
 
 # Assistant name
 assistName = 'friday'
@@ -20,6 +22,8 @@ engine.setProperty('volume', 0.7)
 # Valid options lists to voice recognizer
 exitValidOptions = ['salir','exit','cerrar']
 musicValidOptions = ['reproduce','escuchar','play']
+
+base_url = "https://v2.jokeapi.dev/joke/Any?lang=es"
 
 
 # Initialize flag is true to execute loop code
@@ -64,6 +68,8 @@ def run(command):
     elif any(exit in command for exit in exitValidOptions):
         flag = 0
         talk("Saliendo...")
+    elif 'chiste' in command:
+        jokeTalk()
     else:
         talk('Lo siento, no te he entendido')
     
@@ -87,6 +93,17 @@ def hourTalk():
     """Takes the current time and returns it to the user using the talk function to speak"""
     hora = datetime.datetime.now().strftime('%I:%M %p')
     talk("Son las " + hora)
+
+def jokeTalk():
+    """Call to external joke API and with get request and recieve any joke as response to display it with the talk funtion to the user."""
+    response = requests.request("GET", base_url)
+    value = response.text
+    jsonValue = json.loads(value)
+    if "joke" in jsonValue:
+        talk(jsonValue['joke'])
+    else:
+        talk(jsonValue['setup'])
+        talk(jsonValue['delivery'])
 
 # While flag is true, execute listen function to assistant works
 while flag:
